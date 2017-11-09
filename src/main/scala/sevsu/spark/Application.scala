@@ -1,5 +1,7 @@
 package sevsu.spark
 
+import java.nio.file.Paths
+
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.rdd.RDD
 
@@ -9,7 +11,7 @@ object Application {
     .setAppName("spark_example")
     .set("spark.ui.showConsoleProgress", "false")
 
-  private val sc: SparkContext = new SparkContext(conf)
+  private val sc: SparkContext = getSparkContext(conf)
 
   private val resourcesRoot: String = this.getClass.getResource("/").toString
   private val personPath: String = resourcesRoot + "person.csv"
@@ -25,5 +27,16 @@ object Application {
 
 
     sc.stop()
+  }
+
+  private def getSparkContext(conf: SparkConf): SparkContext = {
+    if (System.getProperty("os.name").toLowerCase.contains("windows")) {
+      System.setProperty(
+        "hadoop.home.dir",
+        Paths.get(this.getClass.getResource("/winutils/hadoop-2.7.1/").toURI).toString
+      )
+    }
+
+    new SparkContext(conf)
   }
 }
